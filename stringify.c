@@ -1,7 +1,7 @@
 #include "jsonparser.h"
-#include<stdlib.h>
-#include<stdio.h>
-#include<string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 char *stringify(const json_node *root)
 {
@@ -9,7 +9,7 @@ char *stringify(const json_node *root)
     json_node *p;
     int first;
 
-    pstr = ret = new char[500];
+    pstr = ret = (char *)malloc(500 * sizeof(char));
     memset(ret, 0, 500);
     first = 1;
 
@@ -40,7 +40,7 @@ char *stringify(const json_node *root)
             tmp = stringify(p);
             strcpy(pstr, tmp);
             pstr += strlen(tmp);
-            delete[] tmp;
+            free(tmp);
             p = p->next;
         }
         *pstr++ = '}';
@@ -59,7 +59,7 @@ char *stringify(const json_node *root)
             tmp = stringify(p);
             strcpy(pstr, tmp);
             pstr += strlen(tmp);
-            delete[] tmp;
+            free(tmp);
             p = p->next;
         }
         *pstr++ = ']';
@@ -71,7 +71,7 @@ char *stringify(const json_node *root)
         *pstr++ = '\"';
         break;
     case NUMBER:
-        tmp = new char[100];
+        tmp = (char *)malloc(100 * sizeof(char));
         sprintf(tmp, "%g", root->value);
         strcpy(pstr, tmp);
         pstr += strlen(tmp);
@@ -81,7 +81,7 @@ char *stringify(const json_node *root)
         pstr += 4;
         break;
     case FALSE:
-        strcpy(pstr,"false" );
+        strcpy(pstr, "false");
         pstr += 5;
         break;
     case NUL:

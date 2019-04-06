@@ -9,7 +9,7 @@ char *random_str()
     char chars[] = "0123456789abcdefghighlmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     length = rand() % 15 + 5;
-    char *ret = new char[length];
+    char *ret = (char *)malloc(length * sizeof(char));
 
     for (i = 0; i < length; i++)
         ret[i] = chars[rand() % 63];
@@ -30,7 +30,7 @@ json_node *generate(int elem_count)
 
     first = 1;
     used = 0;
-    p = ret = new json_node;
+    p = ret = (json_node *)malloc(sizeof(json_node));
     ret->next = NULL;
     ret->name = NULL;
     ret->value = 0L;
@@ -66,8 +66,10 @@ json_node *generate(int elem_count)
             ret->type = OBJECT;
             while (used < elem_count)
             {
-                if (elem_count - used == 1)count = 1;
-                else count = rand() % (elem_count - used - 1) + 1; //从1到elem_count - used
+                if (elem_count - used == 1)
+                    count = 1;
+                else
+                    count = rand() % (elem_count - used - 1) + 1; //从1到elem_count - used
                 used += count;
                 if (first)
                 {
@@ -88,8 +90,10 @@ json_node *generate(int elem_count)
             ret->type = ARRAY;
             while (used < elem_count)
             {
-                if (elem_count - used == 1)count = 1;
-                else count = rand() % (elem_count - used-1) + 1; //从1到elem_count - used
+                if (elem_count - used == 1)
+                    count = 1;
+                else
+                    count = rand() % (elem_count - used - 1) + 1; //从1到elem_count - used
                 used += count;
                 if (first)
                 {

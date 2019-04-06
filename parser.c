@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 
-enum token_type
+typedef enum
 {
     Token_Colon,
     Token_Comma,
@@ -20,8 +20,8 @@ enum token_type
     Token_End,
     Token_Unknown,
     Token_Error
-};
-enum state
+} token_type;
+typedef enum
 {
     State_Start,
 
@@ -38,21 +38,21 @@ enum state
     State_ArrayEnd,
 
     State_End
-};
-struct token
+} state;
+typedef struct _token
 {
     token_type type;
     union {
         char *str_val;
         double num_val;
     };
-};
+} token;
 
 token tokenizer(const char *json_str)
 {
     static char *pstr = NULL;
     if (pstr == NULL)
-        pstr = const_cast<char *>(json_str);
+        pstr = json_str;
     token ret;
 
     char *start;
@@ -115,7 +115,7 @@ token tokenizer(const char *json_str)
             }
             if (*pstr == '\0')
                 goto TOKEN_ERROR;
-            ret.str_val = new char[pstr - start];
+            ret.str_val = (char *)malloc(sizeof(char) * (pstr - start));
             strncpy(ret.str_val, start, pstr - start);
             ret.str_val[pstr - start] = '\0';
             break;
@@ -170,7 +170,7 @@ json_node *parse(const char *json_str)
     json_node *root;
     json_node *this_node;
     token this_token;
-    do
+    while (1)
     {
         this_token = tokenizer(json_str);
         switch (this_token.type)
@@ -179,7 +179,7 @@ json_node *parse(const char *json_str)
             switch (now_state)
             {
             case State_Start: //ok
-                this_node = root = new json_node;
+                this_node = root = (json_node *)malloc(sizeof(json_node));
                 this_node->type = OBJECT;
                 this_node->name = NULL;
                 this_node->child_head = NULL;
@@ -191,7 +191,7 @@ json_node *parse(const char *json_str)
                 node_stack[top] = this_node;
                 state_stack[top++] = (this_node->name == NULL) ? State_Element : State_Value;
                 //有名字一定在object中,否则在array中
-                this_node->child_head = new json_node;
+                this_node->child_head = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->child_head;
 
                 this_node->type = OBJECT;
@@ -208,7 +208,7 @@ json_node *parse(const char *json_str)
                 now_state = State_Object;
                 break;
             case State_ArrayComma: //ok
-                this_node->next = new json_node;
+                this_node->next = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->next;
 
                 this_node->type = OBJECT;
@@ -226,8 +226,8 @@ json_node *parse(const char *json_str)
             switch (now_state)
             {
             case State_Start: //ok
-                this_node = root = new json_node;
-
+                this_node = root = (json_node *)malloc(sizeof(json_node));
+                
                 this_node->type = ARRAY;
                 this_node->name = NULL;
                 this_node->child_head = NULL;
@@ -239,7 +239,7 @@ json_node *parse(const char *json_str)
                 node_stack[top] = this_node;
                 state_stack[top++] = (this_node->name == NULL) ? State_Element : State_Value;
                 //有名字一定在object中,否则在array中
-                this_node->child_head = new json_node;
+                this_node->child_head = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->child_head;
 
                 this_node->name = NULL;
@@ -256,7 +256,7 @@ json_node *parse(const char *json_str)
                 now_state = State_Array;
                 break;
             case State_ArrayComma: //ok
-                this_node->next = new json_node;
+                this_node->next = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->next;
 
                 this_node->type = ARRAY;
@@ -326,7 +326,7 @@ json_node *parse(const char *json_str)
                 break;
                 // case State_ObjectComma:
 
-                // this_node->next = new json_node;
+                // this_node->next = ( json_node*)malloc( sizeof(json_node));
                 // this_node = this_node->next;
 
                 // this_node->type = NUL;
@@ -334,7 +334,7 @@ json_node *parse(const char *json_str)
 
                 // break;
             case State_ArrayComma:
-                this_node->next = new json_node;
+                this_node->next = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->next;
 
                 this_node->type = NUL;
@@ -355,7 +355,7 @@ json_node *parse(const char *json_str)
                 node_stack[top] = this_node;
                 state_stack[top++] = (this_node->name == NULL) ? State_Element : State_Value;
                 //有名字一定在object中,否则在array中
-                this_node->child_head = new json_node;
+                this_node->child_head = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->child_head;
 
                 this_node->name = this_token.str_val;
@@ -367,7 +367,7 @@ json_node *parse(const char *json_str)
                 node_stack[top] = this_node;
                 state_stack[top++] = (this_node->name == NULL) ? State_Element : State_Value;
                 //根据名字判断状态
-                this_node->child_head = new json_node;
+                this_node->child_head = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->child_head;
 
                 this_node->type = STRING;
@@ -384,7 +384,7 @@ json_node *parse(const char *json_str)
                 now_state = State_Value;
                 break;
             case State_ObjectComma: //ok
-                this_node->next = new json_node;
+                this_node->next = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->next;
 
                 this_node->name = this_token.str_val;
@@ -394,7 +394,7 @@ json_node *parse(const char *json_str)
                 now_state = State_Key;
                 break;
             case State_ArrayComma: //ok
-                this_node->next = new json_node;
+                this_node->next = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->next;
 
                 this_node->type = STRING;
@@ -415,7 +415,7 @@ json_node *parse(const char *json_str)
                 node_stack[top] = this_node;
                 state_stack[top++] = (this_node->name == NULL) ? State_Element : State_Value;
                 //根据名字判断状态
-                this_node->child_head = new json_node;
+                this_node->child_head = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->child_head;
 
                 this_node->type = NUMBER;
@@ -433,7 +433,7 @@ json_node *parse(const char *json_str)
                 now_state = State_Value;
                 break;
             case State_ArrayComma: //ok
-                this_node->next = new json_node;
+                this_node->next = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->next;
 
                 this_node->type = NUMBER;
@@ -460,7 +460,7 @@ json_node *parse(const char *json_str)
                 node_stack[top] = this_node;
                 state_stack[top++] = (this_node->name == NULL) ? State_Element : State_Value;
                 //根据名字判断状态
-                this_node->child_head = new json_node;
+                this_node->child_head = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->child_head;
 
                 this_node->type = TRUE;
@@ -471,7 +471,7 @@ json_node *parse(const char *json_str)
                 now_state = State_Element;
                 break;
             case State_ArrayComma: //ok
-                this_node->next = new json_node;
+                this_node->next = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->next;
 
                 this_node->type = TRUE;
@@ -500,7 +500,7 @@ json_node *parse(const char *json_str)
                 node_stack[top] = this_node;
                 state_stack[top++] = (this_node->name == NULL) ? State_Element : State_Value;
                 //根据名字判断状态
-                this_node->child_head = new json_node;
+                this_node->child_head = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->child_head;
 
                 this_node->type = FALSE;
@@ -511,7 +511,7 @@ json_node *parse(const char *json_str)
                 now_state = State_Element;
                 break;
             case State_ArrayComma: //ok
-                this_node->next = new json_node;
+                this_node->next = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->next;
 
                 this_node->type = FALSE;
@@ -539,7 +539,7 @@ json_node *parse(const char *json_str)
                 node_stack[top] = this_node;
                 state_stack[top++] = (this_node->name == NULL) ? State_Element : State_Value;
                 //根据名字判断状态
-                this_node->child_head = new json_node;
+                this_node->child_head = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->child_head;
 
                 this_node->type = NUL;
@@ -550,7 +550,7 @@ json_node *parse(const char *json_str)
                 now_state = State_Element;
                 break;
             case State_ArrayComma: //ok
-                this_node->next = new json_node;
+                this_node->next = (json_node *)malloc(sizeof(json_node));
                 this_node = this_node->next;
 
                 this_node->type = NUL;
@@ -568,8 +568,10 @@ json_node *parse(const char *json_str)
             break;
         case Token_Unknown:
             break;
+        case Token_End:
+            return root;
         } //switch
-    } while (this_token.type != Token_End);
+    }
     return root;
 PARSE_ERROR:
     //to-do

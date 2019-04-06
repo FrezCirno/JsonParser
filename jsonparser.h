@@ -1,5 +1,5 @@
 #pragma once
-enum json_type
+typedef enum
 {
     FALSE,
     TRUE,
@@ -9,10 +9,11 @@ enum json_type
     OBJECT,
     NUL,
     UNKNOWN
-};
-struct json_node
+} node_type;
+typedef struct _json_node json_node;
+struct _json_node
 {
-    json_type type;
+    node_type type;
     char *name;
     union {
         double value;          //数值类
@@ -21,11 +22,11 @@ struct json_node
     };
     json_node *next;
 };
-
 /*
  * 解析json
  * */
-json_node *parse(const char *json_str);
+json_node *
+parse(const char *json_str);
 /*
  * 生成json
  * */
