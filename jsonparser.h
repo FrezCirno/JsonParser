@@ -14,7 +14,7 @@ typedef struct _json_node json_node;
 struct _json_node
 {
     node_type type;
-    char *name;
+    string name;
     union {
         double value;          //数值类
         json_node *child_head; //object或者array
