@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "exstring.h"
 #include "jsonparser.h"
 #include "utf-8.h"
 
@@ -43,7 +42,6 @@ typedef struct _token {
     double num_val;
   };
 } token;
-
 
 token tokenizer(const char* json_str) {
   static char* pstr = NULL;
@@ -108,6 +106,7 @@ token tokenizer(const char* json_str) {
       case '\"':
         pstr++;
         ret.type = Token_String;
+        ret.str_val = init_str();
         int end = 0;
 
         while (!end) {
@@ -121,31 +120,31 @@ token tokenizer(const char* json_str) {
               switch (*pstr) {
                 case '/':
                   pstr++;
-                  PUSH_BACK(ret.str_val, '/');
+                  push_back(ret.str_val, '/');
                   break;
                 case 'b':
                   pstr++;
-                  PUSH_BACK(ret.str_val, '\b');
+                  push_back(ret.str_val, '\b');
                   break;
                 case 'f':
                   pstr++;
-                  PUSH_BACK(ret.str_val, '\f');
+                  push_back(ret.str_val, '\f');
                   break;
                 case 't':
                   pstr++;
-                  PUSH_BACK(ret.str_val, '\t');
+                  push_back(ret.str_val, '\t');
                   break;
                 case 'n':
                   pstr++;
-                  PUSH_BACK(ret.str_val, '\n');
+                  push_back(ret.str_val, '\n');
                   break;
                 case 'r':
                   pstr++;
-                  PUSH_BACK(ret.str_val, '\r');
+                  push_back(ret.str_val, '\r');
                   break;
                 case '\"':
                   pstr++;
-                  PUSH_BACK(ret.str_val, '\"');
+                  push_back(ret.str_val, '\"');
                   break;
                 case 'u':
                   pstr++;
@@ -156,7 +155,8 @@ token tokenizer(const char* json_str) {
                     goto TOKEN_ERROR;
                   }
                   pstr = p;
-                  PUSH_BACK_STR(ret.str_val, result, strlen(result));
+                  push_back_str(ret.str_val, result, strlen(result));
+                  free(result);
                   break;
                 default:
                   goto TOKEN_ERROR;
@@ -164,7 +164,7 @@ token tokenizer(const char* json_str) {
               }
               break;
             default:
-              PUSH_BACK(ret.str_val, *pstr);
+              push_back(ret.str_val, *pstr);
               pstr++;
               break;
           }
@@ -196,6 +196,7 @@ token tokenizer(const char* json_str) {
       default:
         pstr++;
         ret.type = Token_Unknown;
+        break;
     }  // switch
     return ret;
   }  // while

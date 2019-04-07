@@ -1,36 +1,17 @@
-typedef struct {
+#pragma once
+
+typedef struct _string {
   char* value;
   int length;
   int capacity;
-} string;
+} * string;
 
-#define INIT_STR(x)                            \
-  x.value = (char*)malloc(100 * sizeof(char)); \
-  memset(x.value, 0, 100);                     \
-  x.length = 0;                                \
-  x.capacity = 100
+string init_str();
 
-#define NEW_STR_FROM(x, str, len)                     \
-  string x;                                           \
-  x.length = x.capacity = len;                        \
-  x.value = (char*)malloc(x.capacity * sizeof(char)); \
-  strncpy(x.value, str, len)
+string push_back(string x, const char c);
 
-#define PUSH_BACK(x, c)                                                 \
-  do {                                                                  \
-    if (x.length == x.capacity) {                                       \
-      realloc(x.value, (x.capacity = 1.5 * x.capacity) * sizeof(char)); \
-    }                                                                   \
-    x.value[x.length++] = c;                                            \
-  } while (0)
+string push_back_str(string x, const char* s, int len);
 
-#define PUSH_BACK_STR(x, s, len)                                      \
-  do {                                                                \
-    if (x.length + len >= x.capacity) {                               \
-      realloc(x.value, (x.capacity = x.length + len) * sizeof(char)); \
-    }                                                                 \
-    for (int __i = 0; __i < len; __i++)                               \
-      x.value[x.length++] = s[__i];                                   \
-  } while (0)
+string exstrcat(string dst, string src);
 
-#define FREE(x) free(x.value)
+void free_str(string s);

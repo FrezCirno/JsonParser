@@ -1,4 +1,4 @@
-#include <stdio.h>
+#pragma once
 char* parse_hex4(const char* pstr, unsigned* value) {
   int i;
   char ch;
@@ -42,24 +42,24 @@ char* encode_utf8(unsigned value) {
   ret[k] = '\0';
   return ret;
 }
-char* parse_utf8(const char* pstr, char* result) {
-  char* p = pstr;
+char* parse_utf8(const char* pstr, char** result) {
+  char* ret = pstr;
   unsigned u;
-  p = parse_hex4(pstr, &u);
-  if (p - pstr != 4)
-    return p;
+  ret = parse_hex4(pstr, &u);
+  if (ret - pstr != 4)
+    return ret;
   if (u >= 0xD800 && u <= 0xDBFF) {
-    if (*p == '\\' && *++p == 'u') {
-      p++;
-      unsigned u2;
-      char* p2;
-      p2 = parse_hex4(p, &u2);
-      if (p2 - p != 4 || u2 < 0xDC00 || u2 > 0xDFFF)
-        return p2;
-      u = (((u - 0xD800) << 10) | (u2 - 0xDC00)) + 0x10000;
-    } else
-      return p;
+    if (*ret != '\\' || *++ret != 'u')
+      return ret;
+    ret++;
+    unsigned u2;
+    char* ret2;
+    ret2 = parse_hex4(ret, &u2);
+    if (ret2 - ret != 4 || u2 < 0xDC00 || u2 > 0xDFFF)
+      return ret2;
+    u = (((u - 0xD800) << 10) | (u2 - 0xDC00)) + 0x10000;
   }
-  result = encode_utf8(u);
-  return p;
+
+  *result = encode_utf8(u);
+  return ret;
 }
