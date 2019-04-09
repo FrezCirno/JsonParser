@@ -1,5 +1,7 @@
-#pragma once
+#ifndef JSONPARSER_H
+#define JSONPARSER_H
 #include "exstring.h"
+#include "utf-8.h"
 typedef enum {
   FALSE,
   TRUE,
@@ -28,8 +30,9 @@ json_node* parse(const char* json_str);
 /*
  * 生成json
  * */
-string stringify(const json_node* root);
+char* stringify(const json_node* root);
 /**
  * 随机生成有elem_count个叶子的json
  * **/
 json_node* generate(int elem_count);
+#endif

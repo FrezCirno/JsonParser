@@ -3,25 +3,15 @@
 #include <time.h>
 #include "jsonparser.h"
 
-string random_str() {
-  int i;
-  char chars[] =
-      "0123456789abcdefghighlmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  char trans[] = "\"bfnr /\\t";
-  char hex[] = "1234567890abcdefABCDEF";
+string random_str() {//UTF8格式
+  int i, length;
+  static char chars[] =
+      "0123456789abcdefABCDEFghighlmnopqrstuvwxyzGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*?()[]{}_+-*/:;,.\\\n\r\b\f\t\0";
   string ret = init_str();
-  for (i = 0; i < ret->length; i++)
-    if (rand() % 10 == 1) {
-      push_back(ret, '/');
-      push_back(ret, trans[rand() % 10]);
-      if (ret->value[ret->length - 1] == 'u') {
-        push_back(ret, hex[rand() % 22]);
-        push_back(ret, hex[rand() % 22]);
-        push_back(ret, hex[rand() % 22]);
-        push_back(ret, hex[rand() % 22]);
-      }
-    } else
-      push_back(ret, chars[rand() % 62]);
+
+  length = rand() % 15 + 5;
+  for (i = 0; i < length; i++)
+      push_back(ret, chars[rand() % 95]);
   return ret;
 }
 
@@ -41,7 +31,6 @@ json_node* generate(int elem_count) {
   ret->next = NULL;
   ret->name = NULL;
   ret->value = 0L;
-
   if (elem_count == 1) {
     switch (rand() % 5) {
       case 0:
@@ -62,7 +51,7 @@ json_node* generate(int elem_count) {
         ret->type = NUL;
         break;
     }
-  } else {
+  } else {//0 or 2+
     switch (rand() % 2) {
       case 0:
         ret->type = OBJECT;
@@ -71,18 +60,18 @@ json_node* generate(int elem_count) {
             count = 1;
           else
             count =
-                rand() % (elem_count - used - 1) + 1;  //从1到elem_count - used
+                rand() % (elem_count - used) ;  //从0到elem_count - used
           used += count;
           if (first) {
             first = 0;
             p->child_head = generate(count);
-            p->child_head->name = random_str();
             p = p->child_head;
           } else {
             p->next = generate(count);
-            p->next->name = random_str();
             p = p->next;
           }
+          if(count!=0)
+            p->name = random_str();
         }
         break;
       case 1:
