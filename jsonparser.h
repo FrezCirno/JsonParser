@@ -1,6 +1,9 @@
-#ifndef JSONPARSER_H
-#define JSONPARSER_H
-#include "exstring.h"
+#pragma once
+#include "exstring.h"//动态字符串支持
+
+//其中json_node内部存储字符串用的是utf-8格式,
+//因为utf-8可能含有各种字符,故用动态字符串存储
+//stringnify之后输出成json_hex格式,使用char*存储
 #include "utf-8.h"
 typedef enum {
   FALSE,
@@ -12,27 +15,37 @@ typedef enum {
   NUL,
   UNKNOWN
 } node_type;
-typedef struct _json_node json_node;
-struct _json_node {
+typedef struct _js_node {
   node_type type;
   string name;
   union {
     double value;           //数值类
-    json_node* child_head;  // object或者array
+      struct _js_node *child_head;  // object或者array
     string val_str;         //字符串
   };
-  json_node* next;
-};
+  struct _js_node *next;  //下一个结点
+}node;
+
+
 /*
  * 解析json
  * */
-json_node* parse(const char* json_str);
+node* json_parse(const char* json_str);
+
+
 /*
  * 生成json
  * */
-char* stringify(const json_node* root);
+char* json_strify(const node* root);
+
+
 /**
- * 随机生成有elem_count个叶子的json
+ * 随机生成有elem_count个结点的json
  * **/
-json_node* generate(int elem_count);
-#endif
+node* json_gen(int elem_count);
+
+node* json_insert(node*root, int index, node*elem);
+
+node* json_getnext(node*root);
+
+node* json_getchild(node*root, int index);

@@ -3,21 +3,31 @@
 #include <time.h>
 #include "jsonparser.h"
 int main() {
-  srand(time(NULL));
-  json_node* random;
-  char* random_str;
-  json_node* parse_result;
-  char* result_str;
+    node* rand_json, *parse_result;
+    char* json_str, *result_str;
+    int select, count;
+    char s[1000];
 
-  random = generate(20);           //生成具有20个叶子节点的json
-  random_str = stringify(random);  //转换成字符串
+    srand((unsigned)time(NULL));
+    printf("LightJson 演示Demo:\n");
+    printf("1.生成随机Json.\n");
+    printf("2.Json解析\n");
+    scanf("%d", &select);
 
-  printf("%s\n", random_str);
-
-  parse_result = parse(random_str);      //解析
-  result_str = stringify(parse_result);  //再次转换
-
-  printf("%s\n", result_str);
-
-  return 0;
+    switch (select) {
+    case 1:
+        printf("请输入随机生成的json的节点数:\n");
+        scanf("%d", &count);
+        rand_json = json_gen(count);           //生成具有20个节点的json
+        json_str = json_strify(rand_json);  //转换成字符串
+        printf("%s\n\n", json_str);
+        break;
+    case 2:
+        fgets(s, 1000, stdin);
+        node*result = json_parse(s);
+        json_str = json_strify(rand_json);  //转换成字符串
+        printf("%s\n\n", json_str);
+        break;
+    }
+    return 0;
 }

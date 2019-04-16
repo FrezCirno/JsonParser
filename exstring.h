@@ -1,17 +1,17 @@
 #pragma once
 
 typedef struct _string {
-    char *value;
     int   length;
     int   capacity;
+    char *value;
 } * string;
 
 string init_str();
 
 void push_back(string x, const char c);
 
-void push_back_str(string x, const char *s, int len);
+void push_back_str(string x, const char *s);
 
-string exstrcat(string dst, string src);
+string concat(string dst, string src);
 
 void free_str(string s);

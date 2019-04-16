@@ -1,4 +1,5 @@
 #include "exstring.h"
+#include<stdio.h>
 #include <stdlib.h>
 
 string init_str()
@@ -20,30 +21,35 @@ void push_back(string x, const char c)
         if (new_val == NULL) {
             printf("ERROR");
             free(x->value);
-            return NULL;
+            return;
         }
         x->value = new_val;
     }
     x->value[x->length++] = c;
 }
 
-void push_back_str(string x, const char *s, int len)
+void push_back_str(string dst, const char *src)
 {
     char *new_val;
-    if (x == NULL || s == NULL || len == 0) return;
-    if (x->length + len >= x->capacity) {
-        new_val = (char *)realloc(x->value, (x->capacity = x->length + len) *
-                                                sizeof(char));
+    int   src_len = strlen(src);
+    if (dst == NULL || src == NULL || src_len == 0) return;
+    if (dst->length + src_len >= dst->capacity) {
+        new_val = (char *)realloc(dst->value, (dst->capacity = 2 * (dst->length + src_len)) *
+            sizeof(char));
         if (new_val == NULL) {
-            free(x->value);
-            return NULL;
+            printf("memory overflow\n");
+            free(dst->value);
+            return;
         }
-        x->value = new_val;
+        dst->value = new_val;
     }
-    for (int i = 0; i < len; i++) x->value[x->length++] = s[i];
+    for (int i = 0; i < src_len; i++)
+        dst->value[dst->length++] = src[i];
+    //printf("pushbackstr <%s> to char* s\n", s);
+    return;
 }
 
-string exstrcat(string dst, string src)
+string concat(string dst, string src)
 {
     char *new_val;
     if (dst == NULL || src == NULL) return NULL;

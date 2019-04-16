@@ -1,94 +1,92 @@
+#include "jsonparser.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "jsonparser.h"
 
-char* stringify(const json_node* root) {
-    string pstr,tmp_s;
-    char *ret, *tmp;
-    json_node* p;
-    int first;
+char *json_strify(const node *root)
+{
+    string     tmp_str;
+    char *     ret_str, *child;
+    node *p;
+    int        first;
 
-    if (root == NULL)
-        return NULL;
+    if (root == NULL) return NULL;
 
-    pstr = init_str();
+    tmp_str = init_str();
     first = 1;
 
     if (root->name != NULL) {
-        push_back(pstr, '\"');
-        exstrcat(pstr, encode(root->name));
-        push_back(pstr, '\"');
-        push_back(pstr, ':');
+        push_back(tmp_str, '\"');
+        push_back_str(tmp_str, utf8str_jsonstr(root->name));
+        push_back(tmp_str, '\"');
+        push_back(tmp_str, ':');
     }
-
     switch (root->type) {
-    case OBJECT:
-        push_back(pstr, '{');
+        case OBJECT:
+            push_back(tmp_str, '{');
+            p = root->child_head;
+            while (p != NULL) {
+                if (first)
+                    first = 0;
+                else
+                    push_back(tmp_str, ',');
 
-        p = root->child_head;
-        while (p != NULL) {
-            if (first)
-                first = 0;
-            else
-                push_back(pstr, ',');
-            tmp = stringify(p);
-            push_back_str(pstr, tmp,strlen(tmp));
-            free(tmp);
-            p = p->next;
-        }
-        push_back(pstr, '}');
-        break;
-    case ARRAY:
-        push_back(pstr, '[');
+                child = json_strify(p);
+                if (child != NULL) {
+                    push_back_str(tmp_str, child);
+                    free(child);
+                }
+                p = p->next;
+            }
+            push_back(tmp_str, '}');
+            break;
+        case ARRAY:
+            push_back(tmp_str, '[');
 
-        p = root->child_head;
-        while (p != NULL) {
-            if (first)
-                first = 0;
-            else
-                push_back(pstr, ',');
-            tmp = stringify(p);
-            push_back_str(pstr, tmp, strlen(tmp));
-            free(tmp);
-            p = p->next;
-        }
-        push_back(pstr, ']');
-        break;
-    case STRING:
-        push_back(pstr, '\"');
-        tmp = encode(root->val_str);
-        exstrcat(pstr, tmp);
-        push_back(pstr, '\"');
-        break;
-    case NUMBER:
-        tmp = (char*)malloc(10 * sizeof(char));
-        sprintf(tmp, "%g", root->value);
-        push_back_str(pstr, tmp, strlen(tmp));
-        free(tmp);
-        break;
-    case TRUE:
-        tmp = (char*)malloc(10 * sizeof(char));
-        strcpy(tmp, "true");
-        push_back_str(pstr, tmp, strlen(tmp));
-        free(tmp);
-        break;
-    case FALSE:
-        tmp = (char*)malloc(10 * sizeof(char));
-        strcpy(tmp, "false");
-        push_back_str(pstr, tmp, strlen(tmp));
-        free(tmp);
-        break;
-    case NUL:
-        tmp = (char*)malloc(10 * sizeof(char));
-        strcpy(tmp, "null");
-        push_back_str(pstr, tmp, strlen(tmp));
-        free(tmp);
-        break;
+            p = root->child_head;
+            while (p != NULL) {
+                if (first)
+                    first = 0;
+                else
+                    push_back(tmp_str, ',');
+                child = json_strify(p);
+                if (child != NULL) {
+                    push_back_str(tmp_str, child);
+                    free(child);
+                }
+                p = p->next;
+            }
+            push_back(tmp_str, ']');
+            break;
+        case STRING:
+            push_back(tmp_str, '\"');
+            push_back_str(tmp_str, utf8str_jsonstr(root->val_str));
+            push_back(tmp_str, '\"');
+            break;
+        case NUMBER:
+            child = (char *)malloc(10 * sizeof(char));
+            sprintf(child, "%g", root->value);
+            push_back_str(tmp_str, child);
+            free(child);
+            break;
+        case TRUE:
+            push_back_str(tmp_str, "true");
+            break;
+        case FALSE:
+            push_back_str(tmp_str, "false");
+            break;
+        case NUL:
+            push_back_str(tmp_str, "null");
+            break;
     }
+    //只保留char*部分
+    push_back(tmp_str, '\0');
+    ret_str = tmp_str->value;
+    free(tmp_str);
+    return ret_str;
+}
 
-    ret = (char*)malloc(pstr->length * sizeof(char));
-    strncpy(ret, pstr->value, pstr->length);
-    free_str(pstr);
-    return ret;
+void json_prettify(const node*root) {
+
 }
